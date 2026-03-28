@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Family Album 💛</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --cream:#fdf8f0; --warm:#f5e6c8; --gold:#c9973a; --deep:#3a2a1a; --soft:#8a6a4a; --shadow:rgba(58,42,26,0.15); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--cream); font-family:'Nunito',sans-serif; color:var(--deep); min-height:100vh; }
+
+  .hero { background:linear-gradient(160deg,#3a2a1a 0%,#6b4c2a 50%,#c9973a 100%); color:white; text-align:center; padding:60px 20px 50px; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-icon { font-size:3rem; margin-bottom:16px; animation:float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .hero h1 { font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem,7vw,4rem); font-weight:300; letter-spacing:2px; margin-bottom:10px; }
+  .hero p { font-size:0.95rem; font-weight:300; opacity:0.8; letter-spacing:1px; }
+  .photo-count { display:inline-block; margin-top:20px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:30px; padding:8px 24px; font-size:0.85rem; }
+
+  .controls { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; padding:20px 16px 12px; background:var(--warm); border-bottom:1px solid rgba(201,151,58,0.2); }
+  .btn { background:white; border:1.5px solid var(--gold); color:var(--deep); padding:8px 20px; border-radius:25px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.25s; }
+  .btn:hover,.btn.active { background:var(--gold); color:white; transform:translateY(-2px); box-shadow:0 4px 14px rgba(201,151,58,0.35); }
+  .btn-play { background:var(--deep); border-color:var(--deep); color:white; }
+  .btn-play:hover { background:var(--gold); border-color:var(--gold); }
+
+  .search-bar { display:flex; justify-content:center; padding:14px 16px; background:var(--warm); }
+  .search-bar input { width:100%; max-width:420px; padding:10px 20px; border:1.5px solid rgba(201,151,58,0.4); border-radius:25px; font-family:'Nunito',sans-serif; font-size:0.9rem; background:white; color:var(--deep); outline:none; }
+  .search-bar input:focus { border-color:var(--gold); }
+
+  .stats { text-align:center; padding:10px; color:var(--soft); font-size:0.8rem; }
+
+  .gallery-wrap { padding:16px 10px 80px; max-width:1200px; margin:0 auto; }
+  .gallery { display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+  .gallery.v2 { grid-template-columns:repeat(2,1fr); }
+  .gallery.v3 { grid-template-columns:repeat(3,1fr); }
+  @media(max-width:480px) { .gallery { grid-template-columns:repeat(2,1fr); gap:5px; } .gallery.v3 { grid-template-columns:repeat(3,1fr); gap:4px; } }
+
+  .photo-card { position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; cursor:pointer; background:var(--warm); box-shadow:0 2px 8px var(--shadow); transition:transform 0.25s,box-shadow 0.25s; animation:fadeIn 0.4s ease both; }
+  @keyframes fadeIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+  .photo-card:hover { transform:scale(1.04); box-shadow:0 8px 24px var(--shadow); z-index:2; }
+  .photo-card img { width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(58,42,26,0.75) 0%,transparent 55%); opacity:0; transition:opacity 0.3s; display:flex; align-items:flex-end; padding:8px; }
+  .photo-card:hover .photo-overlay { opacity:1; }
+  .photo-num { color:white; font-size:0.7rem; font-weight:600; background:rgba(201,151,58,0.85); border-radius:10px; padding:2px 8px; }
+
+  .empty { text-align:center; padding:60px 20px; color:var(--soft); grid-column:1/-1; }
+  .empty .icon { font-size:3rem; margin-bottom:14px; }
+
+  .lightbox { display:none; position:fixed; inset:0; z-index:1000; background:rgba(10,5,2,0.97); flex-direction:column; align-items:center; justify-content:center; }
+  .lightbox.open { display:flex; }
+  .lb-header { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent); color:white; z-index:2; }
+  .lb-num { font-size:0.85rem; opacity:0.7; }
+  .lb-close { background:none; border:none; color:white; font-size:1.8rem; cursor:pointer; opacity:0.8; }
+  .lb-close:hover { opacity:1; }
+  .lb-img-wrap { width:100%; height:100%; display:flex; align-items:center; justify-content:center; padding:65px 70px; }
+  .lb-img-wrap img { max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; box-shadow:0 10px 60px rgba(0,0,0,0.6); }
+  .lb-nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:white; border-radius:50%; width:48px; height:48px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.4rem; transition:background 0.2s; backdrop-filter:blur(4px); }
+  .lb-nav:hover { background:rgba(201,151,58,0.6); }
+  .lb-prev { left:12px; } .lb-next { right:12px; }
+  .lb-footer { position:absolute; bottom:0; left:0; right:0; padding:16px 20px; background:linear-gradient(to top,rgba(0,0,0,0.7),transparent); color:white; text-align:center; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1rem; opacity:0.85; }
+
+  .ss-bar { display:none; background:var(--deep); color:white; padding:10px 20px; justify-content:center; align-items:center; gap:14px; font-size:0.85rem; }
+  .ss-bar.on { display:flex; }
+  .ss-bar select { background:transparent; border:1px solid rgba(255,255,255,0.3); color:white; border-radius:20px; padding:4px 10px; font-family:'Nunito',sans-serif; cursor:pointer; }
+  .ss-bar button { background:none; border:1px solid rgba(255,255,255,0.3); color:white; border-radius:20px; padding:4px 16px; cursor:pointer; font-family:'Nunito',sans-serif; }
+
+  /* SETUP BOX */
+  .setup-box { margin:20px; padding:28px; background:white; border-radius:16px; border:1.5px solid rgba(201,151,58,0.3); box-shadow:0 4px 20px var(--shadow); }
+  .setup-box h3 { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; margin-bottom:18px; }
+  .step { display:flex; gap:14px; align-items:flex-start; margin-bottom:14px; font-size:0.88rem; line-height:1.7; }
+  .sn { background:var(--gold); color:white; border-radius:50%; width:28px; height:28px; min-width:28px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; margin-top:2px; }
+  code { background:rgba(201,151,58,0.12); padding:2px 8px; border-radius:6px; font-family:monospace; font-size:0.85rem; }
+  pre { background:#fdf8f0; padding:14px; border-radius:10px; margin-top:10px; font-size:0.78rem; overflow:auto; border:1px solid rgba(201,151,58,0.2); line-height:1.6; }
+  .tip { background:rgba(201,151,58,0.08); border-left:3px solid var(--gold); padding:12px 16px; border-radius:0 10px 10px 0; margin-top:16px; font-size:0.83rem; color:var(--soft); }
+
+  .scroll-top { position:fixed; bottom:24px; right:20px; background:var(--gold); color:white; border:none; border-radius:50%; width:46px; height:46px; font-size:1.2rem; cursor:pointer; box-shadow:0 4px 16px rgba(201,151,58,0.5); display:none; align-items:center; justify-content:center; z-index:500; }
+  .scroll-top.show { display:flex; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-icon">📸</div>
+  <h1>Our Family Album</h1>
+  <p>A collection of beautiful memories</p>
+  <div class="photo-count" id="badge">Loading...</div>
+</div>
+
+<div class="ss-bar" id="ssBar">
+  <span>▶ Slideshow running</span>
+  <select id="ssSpeed" onchange="updateSpeed()">
+    <option value="2000">2 sec</option>
+    <option value="3000" selected>3 sec</option>
+    <option value="5000">5 sec</option>
+    <option value="8000">8 sec</option>
+  </select>
+  <button onclick="stopSlideshow()">⏹ Stop</button>
+</div>
+
+<div class="controls">
+  <button class="btn btn-play" onclick="startSlideshow()">▶ Slideshow</button>
+  <button class="btn active" id="b4" onclick="setView('v4','b4')">⊞ 4</button>
+  <button class="btn" id="b3" onclick="setView('v3','b3')">⊟ 3</button>
+  <button class="btn" id="b2" onclick="setView('v2','b2')">▣ 2</button>
+</div>
+
+<div class="search-bar">
+  <input id="search" type="text" placeholder="🔍 Search by photo name..." oninput="filterPhotos()">
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="setup-box" id="setupBox" style="display:none">
+  <h3>📁 How to set up your album on GitHub</h3>
+  <div class="step"><div class="sn">1</div><div>In your GitHub repo, create a folder called <code>photos</code> and upload all your images there</div></div>
+  <div class="step"><div class="sn">2</div><div>Create a file called <code>photos.json</code> in the <b>root</b> of the repo (same level as <code>index.html</code>) listing all your photo filenames:
+    <pre>["photo1.jpg", "photo2.jpg", "IMG_001.jpg", "DSC_100.jpg"]</pre>
+  </div></div>
+  <div class="step"><div class="sn">3</div><div>Go to <b>Settings → Pages → Source: main branch → / (root)</b> → click <b>Save</b></div></div>
+  <div class="step"><div class="sn">4</div><div>Share the link with your father: <code>https://yourusername.github.io/your-repo-name</code></div></div>
+  <div class="tip">💡 <b>Easy way to make photos.json on Windows:</b> Open the <code>photos</code> folder, press <b>Shift + Right-click</b> → "Open PowerShell here", then type:<br><br>
+  <code>Get-ChildItem -Name | ConvertTo-Json | Out-File ../photos.json</code><br><br>
+  This automatically creates the photos.json file for you!</div>
+</div>
+
+<div class="gallery-wrap">
+  <div class="gallery v4" id="gallery">
+    <div class="empty"><div class="icon">⏳</div><p>Loading your photos...</p></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lb-header">
+    <span class="lb-num" id="lbNum">1 / 1</span>
+    <button class="lb-close" onclick="closeLightbox()">✕</button>
+  </div>
+  <div class="lb-img-wrap"><img id="lbImg" src="" alt=""></div>
+  <button class="lb-nav lb-prev" onclick="lbNav(-1)">‹</button>
+  <button class="lb-nav lb-next" onclick="lbNav(1)">›</button>
+  <div class="lb-footer" id="lbCaption"></div>
+</div>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  let allPhotos = [], filtered = [], current = 0, ssTimer = null;
+
+  async function loadPhotos() {
+    try {
+      const res = await fetch('photos.json');
+      if (!res.ok) throw new Error();
+      const files = await res.json();
+      allPhotos = files.map(f => ({ src: 'photos/' + f, name: f }));
+      filtered = [...allPhotos];
+      document.getElementById('setupBox').style.display = 'none';
+      renderGallery();
+    } catch(e) {
+      document.getElementById('badge').textContent = 'Setup Needed';
+      document.getElementById('stats').textContent = 'Follow the instructions below to add your photos 👇';
+      document.getElementById('setupBox').style.display = 'block';
+      document.getElementById('gallery').innerHTML = `<div class="empty"><div class="icon">📂</div><p>Add your photos following the steps below</p></div>`;
+    }
+  }
+
+  function renderGallery() {
+    document.getElementById('badge').textContent = allPhotos.length + ' Photos';
+    document.getElementById('stats').textContent = allPhotos.length
+      ? `📷 ${allPhotos.length} photos · Showing ${filtered.length}` : '';
+    const g = document.getElementById('gallery');
+    if (!filtered.length) {
+      g.innerHTML = `<div class="empty"><div class="icon">🔍</div><p>No photos match your search</p></div>`;
+      return;
+    }
+    g.innerHTML = filtered.map((p,i) => `
+      <div class="photo-card" onclick="openLb(${i})" style="animation-delay:${Math.min(i*0.015,0.6)}s">
+        <img src="${p.src}" alt="${p.name}" loading="lazy">
+        <div class="photo-overlay"><span class="photo-num">#${allPhotos.indexOf(p)+1}</span></div>
+      </div>`).join('');
+  }
+
+  function filterPhotos() {
+    const q = document.getElementById('search').value.toLowerCase();
+    filtered = allPhotos.filter(p => !q || p.name.toLowerCase().includes(q));
+    renderGallery();
+  }
+
+  function setView(cls, btnId) {
+    document.getElementById('gallery').className = 'gallery ' + cls;
+    ['b2','b3','b4'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById(btnId).classList.add('active');
+  }
+
+  function openLb(idx) {
+    current = idx; showLb();
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function showLb() {
+    const p = filtered[current];
+    document.getElementById('lbImg').src = p.src;
+    document.getElementById('lbNum').textContent = (current+1) + ' / ' + filtered.length;
+    document.getElementById('lbCaption').textContent = p.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+  }
+  function lbNav(d) { current=(current+d+filtered.length)%filtered.length; showLb(); }
+
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key==='ArrowRight') lbNav(1);
+    if (e.key==='ArrowLeft') lbNav(-1);
+    if (e.key==='Escape') closeLightbox();
+  });
+  let tx=0;
+  document.getElementById('lightbox').addEventListener('touchstart', e=>tx=e.touches[0].clientX);
+  document.getElementById('lightbox').addEventListener('touchend', e=>{ const dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>50) lbNav(dx<0?1:-1); });
+
+  function startSlideshow() {
+    if (!filtered.length) { alert('No photos loaded!'); return; }
+    if (ssTimer) stopSlideshow();
+    openLb(0);
+    const spd = parseInt(document.getElementById('ssSpeed').value);
+    document.getElementById('ssBar').classList.add('on');
+    ssTimer = setInterval(()=>{ current=(current+1)%filtered.length; showLb(); }, spd);
+  }
+  function stopSlideshow() { clearInterval(ssTimer); ssTimer=null; document.getElementById('ssBar').classList.remove('on'); closeLightbox(); }
+  function updateSpeed() { if(ssTimer){stopSlideshow();startSlideshow();} }
+
+  window.addEventListener('scroll', ()=>{ document.getElementById('scrollTop').classList.toggle('show',scrollY>300); });
+
+  loadPhotos();
+</script>
+</body>
+</html>
